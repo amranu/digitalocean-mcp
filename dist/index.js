@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import 'dotenv/config';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ListToolsRequestSchema, } from '@modelcontextprotocol/sdk/types.js';
@@ -12,8 +13,19 @@ class DigitalOceanMCPServer {
             name: 'digitalocean-mcp',
             version: '1.0.0',
         });
+        this.initializeApiClient();
         this.setupToolHandlers();
         this.setupErrorHandling();
+    }
+    initializeApiClient() {
+        const token = process.env.DIGITALOCEAN_API_TOKEN;
+        if (token) {
+            const config = {
+                token,
+                baseUrl: process.env.DIGITALOCEAN_API_BASE_URL || 'https://api.digitalocean.com'
+            };
+            this.apiClient = new DigitalOceanApiClient(config);
+        }
     }
     setupErrorHandling() {
         this.server.onerror = (error) => console.error('[MCP Error]', error);
@@ -28,7 +40,7 @@ class DigitalOceanMCPServer {
                 tools: [
                     {
                         name: 'configure_digitalocean_api',
-                        description: 'Configure DigitalOcean API credentials',
+                        description: 'Configure DigitalOcean API credentials. Can be auto-configured from DIGITALOCEAN_API_TOKEN environment variable.',
                         inputSchema: {
                             type: 'object',
                             properties: {

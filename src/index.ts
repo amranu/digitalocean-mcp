@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import 'dotenv/config';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -25,8 +26,20 @@ class DigitalOceanMCPServer {
       }
     );
 
+    this.initializeApiClient();
     this.setupToolHandlers();
     this.setupErrorHandling();
+  }
+
+  private initializeApiClient(): void {
+    const token = process.env.DIGITALOCEAN_API_TOKEN;
+    if (token) {
+      const config: DOApiConfig = { 
+        token, 
+        baseUrl: process.env.DIGITALOCEAN_API_BASE_URL || 'https://api.digitalocean.com' 
+      };
+      this.apiClient = new DigitalOceanApiClient(config);
+    }
   }
 
   private setupErrorHandling(): void {
@@ -43,7 +56,7 @@ class DigitalOceanMCPServer {
         tools: [
           {
             name: 'configure_digitalocean_api',
-            description: 'Configure DigitalOcean API credentials',
+            description: 'Configure DigitalOcean API credentials. Can be auto-configured from DIGITALOCEAN_API_TOKEN environment variable.',
             inputSchema: {
               type: 'object',
               properties: {
