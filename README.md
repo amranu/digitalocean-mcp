@@ -196,7 +196,7 @@ For Claude Code users, the server auto-configures from environment variables:
 
 ```bash
 export DIGITALOCEAN_API_TOKEN="your-digitalocean-api-token"
-claude-code
+claude
 ```
 
 ## Real-World Examples
